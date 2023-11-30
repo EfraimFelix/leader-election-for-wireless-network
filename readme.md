@@ -23,11 +23,11 @@ O código oferece as seguintes funcionalidades:
    - Uma vez que o líder é escolhido, a informação sobre o líder é propagada para os vizinhos.
 
 5. **Eleição Única:**
-   - Caso tenha sido iniciado duas eleições sem que haja o término da outra, apenas uma se manterá ativa enquanto a outra será descartada. Para testar essa funcionalidade foi colocado um delay na propagação da eleição de 3s para que se consiga iniciar duas eleições sem que uma termine antes da outra começar.
+   - Caso tenha sido iniciado duas eleições sem que haja o término da outra, apenas uma se manterá ativa enquanto a outra será descartada. Para testar essa funcionalidade foi colocado um delay na propagação da eleição de 3s, para que se tenha tempo hábil para iniciar duas eleições sem que uma termine antes da outra começar.
 
 ## Como Executar com pm2
 
-   O pm2 é um gerenciador de processos e é acoselhavel usa-lo na execução deste projeto devido ao grande numeros de processos que deve ser mantido em execução.
+   O pm2 é um gerenciador de processos e é aconselhável usá-lo na execução deste projeto, devido ao grande número de processos que devem ser mantidos em execução.
 
 1. **Instalar Dependências:**
 
@@ -45,12 +45,12 @@ O código oferece as seguintes funcionalidades:
 
 3. **Executar o Código:**
 
-   - Execute o código para cada processo em uma porta diferente, passando o ID (porta do processo) do processo como argumento da linha de comando. Por exemplo:
+   - Execute o código para cada processo em uma porta diferente, passando PORTA como argumento da linha de comando. Por exemplo:
      ```bash
-     pm2 start index.js -n ProcessoID -- ID
+     pm2 start index.js -n ProcessoPORTA -- PORTA
      ```
-     `-n ProcessoID` define um nome para o processo e `ID` é o argumento passado para o algoritmo.
-     Certifique-se de ajustar o número da ID conforme consta no objeto `allProcessInfo`.
+     `-n ProcessoPORTA` define um nome para o processo.`PORTA` é a porta onde o processo será executado e que será passado como argumento para o algoritmo.
+     Certifique-se de ajustar o número da PORTA conforme consta no objeto `allProcessInfo` dentro do arquivo `index.js`.
 
 4. **Gerenciando os processos:**
 
@@ -68,16 +68,16 @@ O código oferece as seguintes funcionalidades:
 5. **Iniciando eleição:**
 
 - Use a seguinte rota para iniciar uma eleição dentro do sistema:
-  - `http://localhost:ID/startElection`: Inicia uma eleição no processo.
-    Ajuste o valor de ID para o número correspondente ao processo no qual você deseja iniciar a eleição.
+  - `http://localhost:PORTA/startElection`: Inicia uma eleição no processo.
+    Ajuste o valor de PORTA para o número correspondente ao processo no qual você deseja iniciar a eleição.
 
 ## Observações
 
-- Certifique-se de ajustar as informações sobre os vizinhos e pesos associados a cada processo no objeto `allProcessInfo` conforme a topologia desejada.
+- Uma topologia já está definida por padrão, o diagrama dela se encontra no fim deste arquivo. Caso queira alterar, certifique-se de ajustar as informações sobre os vizinhos e pesos associados a cada processo no objeto `allProcessInfo` conforme a topologia desejada. 
 
 - O código utiliza o Express.js para criar um servidor web para cada processo, permitindo a comunicação entre eles.
 
-- O processo com o maior ID ganha em caso de empate no peso.
+- O processo com o maior PORTA ganha em caso de empate no peso.
 
 - A liderança é propagada pelos processos, garantindo que todos os processos estejam cientes do líder atual.
 
