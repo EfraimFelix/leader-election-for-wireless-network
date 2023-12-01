@@ -7,16 +7,16 @@ const app = express();
 app.use(express.json());
 
 const allProcessInfo = {
-  /* A*/ 3001: { weight: 4, neighbors: ["3002", "3010"] },
-  /* B*/ 3002: { weight: 6, neighbors: ["3001", "3003", "3007"] },
-  /* C*/ 3003: { weight: 3, neighbors: ["3002", "3004", "3005"] },
-  /* D*/ 3004: { weight: 2, neighbors: ["3003", "3005", "3006"] },
-  /* E*/ 3005: { weight: 1, neighbors: ["3003", "3004", "3006"] },
-  /* F*/ 3006: { weight: 4, neighbors: ["3004", "3005", "3009"] },
-  /* G*/ 3007: { weight: 2, neighbors: ["3002", "3005", "3008", "3010"] },
-  /* H*/ 3008: { weight: 8, neighbors: ["3007", "3009"] },
-  /* I*/ 3009: { weight: 5, neighbors: ["3006", "3008"] },
-  /* J*/ 3010: { weight: 4, neighbors: ["3001", "3007"] },
+  3001: { weight: 4, neighbors: ["3002", "3010"] },
+  3002: { weight: 6, neighbors: ["3001", "3003", "3007"] },
+  3003: { weight: 3, neighbors: ["3002", "3004", "3005"] },
+  3004: { weight: 2, neighbors: ["3003", "3005", "3006"] },
+  3005: { weight: 1, neighbors: ["3003", "3004", "3006"] },
+  3006: { weight: 4, neighbors: ["3004", "3005", "3009"] },
+  3007: { weight: 2, neighbors: ["3002", "3005", "3008", "3010"] },
+  3008: { weight: 8, neighbors: ["3007", "3009"] },
+  3009: { weight: 5, neighbors: ["3006", "3008"] },
+  3010: { weight: 4, neighbors: ["3001", "3007"] },
 };
 
 const processId = process.argv[2];
@@ -112,7 +112,7 @@ app.get("/responseElection", (req, res) => {
       childResponses.push({ processId, weight });
       //Ordenando os processos
       sortProcess();
-      
+
       console.log(
         `Enviando melhor processo (${childResponses[0].processId}) para o pai`
       );
@@ -258,12 +258,12 @@ function electionPropagation() {
 
 function leaderPropagation(leaderProcess_) {
   childProcess.forEach((child) => {
-      console.log(`Propagando lider ${leaderProcess_} para ${child}`);
-      axiosRequest(child, "leader", {
-        electionBy,
-        processId,
-        leaderProcess: leaderProcess_,
-      });
+    console.log(`Propagando lider ${leaderProcess_} para ${child}`);
+    axiosRequest(child, "leader", {
+      electionBy,
+      processId,
+      leaderProcess: leaderProcess_,
+    });
   });
 }
 
