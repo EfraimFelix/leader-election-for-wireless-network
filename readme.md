@@ -82,3 +82,8 @@ O código oferece as seguintes funcionalidades:
 - A liderança é propagada pelos processos, garantindo que todos os processos estejam cientes do líder atual.
 
 - Todos os processos devem estar ativos para a execução correta do algoritmo.
+
+## Topologia
+
+![Alt text](imgs/topologia.png)
+
