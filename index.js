@@ -54,11 +54,12 @@ app.get("/requestElection", async (req, res) => {
   // resetando leaderProcess para nova eleição
 
   // Definindo um delay de 3 segundos, para teste de eleições paralelas
-  await sleep(3000)
+  await sleep(3000);
 
   leaderProcess = null;
   if (parentProcess == null) {
-    console.log(`Em eleição ... Iniciado por ${req.body.electionBy} `);
+    console.log(`Em eleição ... Iniciado por ${req.body.electionBy}`);
+    resetMetadata(true);
     //Nao tem pai
     noHasParent(req);
   } else {
@@ -69,6 +70,14 @@ app.get("/requestElection", async (req, res) => {
 });
 
 app.get("/responseElection", (req, res) => {
+  if (req.body.electionBy != electionBy) {
+    console.log(
+      `Ignorando resposta (response election) do processo ${req.body.processId} pois a eleição é do processo ${electionBy} e não do processo ${req.body.electionBy}`
+    );
+    res.send();
+    return;
+  }
+
   console.log(
     `Possivel melhor processo é o ${req.body.bestProcess.processId} com peso ${req.body.bestProcess.weight}, informado pelo no ${req.body.processId}`
   );
@@ -78,6 +87,7 @@ app.get("/responseElection", (req, res) => {
     weight: req.body.bestProcess.weight,
   });
 
+  // console.log({ childProcess, childResponses });
   // console.log(`Qtd filhos ${childProcess.length} - Qtd respostas ${childResponses.length}`)
 
   //Caso tenha filhos, e todos eles responderam
@@ -97,15 +107,19 @@ app.get("/responseElection", (req, res) => {
       resetMetadata(false);
     } else {
       // caso o processo seja apenas um no "comum" da arvore
-      console.log(`Enviando melhor processo ${childResponses[0].processId} para o pai`);
 
       //Adicionando o proprio processo para verificar o "melhor"
       childResponses.push({ processId, weight });
       //Ordenando os processos
       sortProcess();
+      
+      console.log(
+        `Enviando melhor processo (${childResponses[0].processId}) para o pai`
+      );
 
       axiosRequest(parentProcess, "responseElection", {
         processId,
+        electionBy,
         bestProcess: {
           processId: childResponses[0].processId,
           weight: childResponses[0].weight,
@@ -118,12 +132,24 @@ app.get("/responseElection", (req, res) => {
 });
 
 app.get("/isNotParent", (req, res) => {
+  if (req.body.electionBy != electionBy) {
+    console.log(
+      `Ignorando resposta (is not parent) do processo ${req.body.processId} pois a eleição é do processo ${electionBy} e não do processo ${req.body.electionBy}`
+    );
+    res.send();
+    return;
+  }
+
   console.log(`Retirando o processo ${req.body.processId} da lista de filhos`);
   childProcess.splice(childProcess.indexOf(req.body.processId), 1);
 
+  // console.log({ childProcess });
+
+  // se o no for uma folha (nao tiver filhos) ele deve enviar a resposta para o pai
   if (childProcess.length == 0) {
     axiosRequest(parentProcess, "responseElection", {
       processId,
+      electionBy,
       bestProcess: { processId, weight },
     });
   }
@@ -131,6 +157,14 @@ app.get("/isNotParent", (req, res) => {
 });
 
 app.get("/leader", (req, res) => {
+  if (req.body.electionBy != electionBy) {
+    console.log(
+      `Ignorando resposta (leader) do processo ${req.body.processId} pois a eleição é do processo ${electionBy} e não do processo ${req.body.electionBy}`
+    );
+    res.send();
+    return;
+  }
+
   // Caso o lider ja tenha sido definido ele nao devera ser propagado
   if (leaderProcess != null) {
     res.send();
@@ -145,7 +179,7 @@ app.get("/leader", (req, res) => {
 
   leaderProcess = req.body.leaderProcess;
 
-  // resetando dados, menos o lider
+  // // resetando dados, menos o lider
   resetMetadata(false);
 
   res.send();
@@ -186,11 +220,13 @@ function hasParent(req) {
     resetMetadata(true);
     noHasParent(req);
     return;
+  } else if (electionBy > req.body.electionBy) {
+    console.log(`Ignorando eleição do processo ${req.body.electionBy}`);
   }
 
   // console.log(`Ja tenho pai: ${parentProcess}`);
 
-  axiosRequest(req.body.processId, "isNotParent", { processId });
+  axiosRequest(req.body.processId, "isNotParent", { processId, electionBy });
 }
 
 async function noHasParent(req) {
@@ -214,21 +250,20 @@ function electionPropagation() {
       childProcess.push(neighbor);
       axiosRequest(neighbor, "requestElection", {
         processId,
-        electionBy: electionBy,
+        electionBy,
       });
     }
   });
 }
 
 function leaderPropagation(leaderProcess_) {
-  neighbors.forEach((neighbor) => {
-    if (neighbor != parentProcess) {
-      console.log(`Propagando lider ${leaderProcess_} para ${neighbor}`);
-      axiosRequest(neighbor, "leader", {
+  childProcess.forEach((child) => {
+      console.log(`Propagando lider ${leaderProcess_} para ${child}`);
+      axiosRequest(child, "leader", {
+        electionBy,
         processId,
         leaderProcess: leaderProcess_,
       });
-    }
   });
 }
 

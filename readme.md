@@ -40,7 +40,7 @@ O código oferece as seguintes funcionalidades:
 
    - Você pode instalar o pm2 utilizando o seguinte comando:
      ```bash
-     npm install pm2@latest -g
+     npm install pm2 -g
      ```
 
 3. **Executar o Código:**
